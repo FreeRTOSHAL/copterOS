@@ -1,0 +1,7 @@
+#
+# For a description of the syntax of this configuration file,
+# see Documentation/kbuild/kconfig-language.txt.
+#
+mainmenu "FreeRTOS Configuration"
+source scripts/Kconfig
+#source src/Kconfig

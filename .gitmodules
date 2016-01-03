@@ -1,0 +1,15 @@
+[submodule "freertos"]
+	path = freertos
+	url = git@scuderia.cs.hs-rm.de:fhal/fhal-kernel.git
+[submodule "scripts"]
+	path = scripts
+	url = git@scuderia.cs.hs-rm.de:fhal/fhal-buildsystem.git
+[submodule "driver"]
+	path = driver
+	url = git@scuderia.cs.hs-rm.de:fhal/fhal-driver.git
+[submodule "mach"]
+	path = mach
+	url = git@scuderia.cs.hs-rm.de:fhal/fhal-mach.git
+[submodule "arch"]
+	path = arch
+	url = git@scuderia.cs.hs-rm.de:fhal/fhal-arch.git
