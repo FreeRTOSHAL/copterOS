@@ -1,0 +1,11 @@
+menu "Aplication Settings"
+config MOTORTEST
+	bool "Motor Test: Warinung Motor speed up to maximum"
+	default n
+config RC_MOTORTEST
+	bool "Motor Test over RC"
+	default n
+config MOTOR_OFF
+	bool "Init PWM only"
+	default n
+endmenu

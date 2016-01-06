@@ -1,0 +1,9 @@
+**.cmd
+**.o
+**.a
+.config*
+**linux
+include/config
+include/generated
+copter
+copter.bin
