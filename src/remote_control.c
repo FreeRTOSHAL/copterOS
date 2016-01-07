@@ -16,6 +16,7 @@ struct rc_channel {
 	bool corret;
 };
 struct rc {
+	bool init;
 	struct rc_channel channel[RC_MAX_CHANNELS];
 	struct timer *timer;
 };
@@ -78,14 +79,19 @@ static bool rc_OverfowHandler(struct timer *ftm, void *data) {
 	return 0;
 }
 
+struct rc rc0;
 
 struct rc *rc_init(struct timer *timer) {
+	struct rc *rc = &rc0;
 	int32_t ret;
-	struct rc *rc = pvPortMalloc(sizeof(struct rc));
-	if (rc == NULL) {
-		goto rc_init_error_0;
+	if (rc->init) {
+		return rc;
+	}
+	if (timer == NULL) {
+		return NULL;
 	}
 	memset(rc, 0, sizeof(struct rc));
+	rc->init = true;
 	rc->timer = timer;
 	ret = timer_setOverflowCallback(rc->timer, rc_OverfowHandler, rc);
 	if (ret < 0) {

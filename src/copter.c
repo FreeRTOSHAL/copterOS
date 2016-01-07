@@ -13,6 +13,11 @@
 #include <motor_ctrl.h>
 #include <remote_control.h>
 #include <linux_client.h>
+#include "csystem.h"
+#include <mpu9250.h>
+#include <spi.h>
+#include <adc.h>
+#include <tps65381.h>
 
 
 #define RC_TIMER 3
@@ -30,9 +35,13 @@
 #define MOTOR_PERIOD 20000
 #define MOTOR_PIN1 3
 #define MOTOR_PIN2 6
-#define MOTOR_PIN3 2
-#define MOTOR_PIN4 0
+#define MOTOR_PIN3 0
+#define MOTOR_PIN4 2
 
+/*
+ * Create MPU, Gyro and Accel Device
+ */
+MPU9250_ADDDEV(mpu0, 1, 0, SPI_OPT_GPIO_DIS, 500000);
 
 static struct gpio *gpio = NULL;
 
@@ -167,6 +176,55 @@ void rcTestTask(void *data) {
 }
 #endif
 
+
+void batTask(void *data) {
+	struct adc *adc = adc_init(1, 12, 4125000);
+	struct spi *spi;
+	int32_t ret;
+	struct tps65381 *tps ;
+	struct spi_opt opt = {
+		.lsb = false,
+		.cpol = false,
+		.cpha = true,
+		.cs = 0,
+		.csLowInactive = false,
+		.gpio = SPI_OPT_GPIO_DIS,
+		.size = 8, 
+		.wdelay = 0,
+		.cs_hold = 54,
+		.cs_delay = 54,
+		.bautrate = 500000
+	};
+	struct spi_slave *slave;
+	float val;
+	TickType_t lastWakeUpTime = xTaskGetTickCount();
+
+	spi = spi_init(0, SPI_3WIRE_CS, NULL);
+	CONFIG_ASSERT(spi != NULL);
+	slave = spiSlave_init(spi, &opt);
+	CONFIG_ASSERT(slave != NULL);
+	tps = tps_init(slave, 100 / portTICK_PERIOD_MS);
+	CONFIG_ASSERT(tps != NULL);
+	for(;;) {
+		ret = tps_mux(tps, TPS_VBAT, 100 / portTICK_PERIOD_MS);
+		CONFIG_ASSERT(ret == 0);
+		vTaskDelay(10 / portTICK_PERIOD_MS);
+		val = tps_diag(tps, TPS_VBAT, adc, 100 / portTICK_PERIOD_MS);
+		printf("TPS_VBAT : %f V\n", val);
+		if (val <= 10) {
+			printf("Voltag to low!!\n");
+			taskDISABLE_INTERRUPTS(); /* Disable all Interrupts */
+			vTaskSuspendAll(); /* Stop all Tasks */
+			motor_set(motor, MOTOR_PIN1, 0);
+			motor_set(motor, MOTOR_PIN2, 0);
+			motor_set(motor, MOTOR_PIN3, 0);
+			motor_set(motor, MOTOR_PIN4, 0);
+			for(;;); /* Block in Intterrupt */
+		}
+		vTaskDelayUntil(&lastWakeUpTime, 250 / portTICK_PERIOD_MS);
+	}
+}
+
 int main() {
 	int32_t ret;
 	ret = irq_init();
@@ -266,7 +324,9 @@ int main() {
 		xTaskCreate(rcTestTask, "RC Test task", 512, rc, 1, NULL);
 #endif
 	}
+	xTaskCreate(batTask, "Bat task", 512, NULL, 4, NULL);
 	printf("Start Scheduler\n");
+	systemLaunch();
 	vTaskStartScheduler ();
 	for(;;);
 	return 0;

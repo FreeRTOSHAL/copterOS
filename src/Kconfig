@@ -8,4 +8,10 @@ config RC_MOTORTEST
 config MOTOR_OFF
 	bool "Init PWM only"
 	default n
+config APP_INCLUDE
+	string
+	default "-Icrazyflie/include/ -Icrazyflie/modules/interface/ -Icrazyflie/hal/interface/ -Icrazyflie/utils/interface/ -Icrazyflie/drivers/interface/"
+config APP_LIBS
+	string
+	default "-lm"
 endmenu

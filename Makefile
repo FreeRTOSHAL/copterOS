@@ -1,5 +1,5 @@
 PROJECT_NAME    := copter
-objs-y		:= src arch mach driver freertos
+objs-y		:= src arch mach driver freertos crazyflie
 #libs-y          := libs
 KBUILD_CLFLAGS := -Wall
 
