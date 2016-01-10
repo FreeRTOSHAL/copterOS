@@ -23,6 +23,7 @@
  *
  *
  */
+#define TUNE_PITCH
 #include <math.h>
 
 #include "FreeRTOS.h"

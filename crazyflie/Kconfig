@@ -5,7 +5,5 @@ config CRAZYFLIE
 	select SENSOR
 	select MPU9250
 	select ACCEL
-	select ACCEL_THREAD_SAVE
 	select GYRO
-	select GYRO_THREAD_SAVE
 	default y

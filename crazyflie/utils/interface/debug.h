@@ -34,7 +34,7 @@
 #ifndef DEBUG_FMT
 #define DEBUG_FMT(fmt) fmt
 #endif
-
+#if 0
 #if defined(DEBUG_PRINT_ON_UART)
   #ifndef ENABLE_UART
     #error "Need to define ENABLE_UART to use DEBUG_PRINT_ON_UART"
@@ -48,6 +48,9 @@
   #define DEBUG_PRINT(fmt, ...) consolePrintf(DEBUG_FMT(fmt), ##__VA_ARGS__)
 #define DEBUG_PRINT_OS(fmt, ...) consolePrintf(DEBUG_FMT(fmt), ##__VA_ARGS__)
   //#define DEBUG_PRINT(fmt, ...)
+#endif
+#else
+#define DEBUG_PRINT(fmt, ...) printf("CRAZY: " fmt, ##__VA_ARGS__)
 #endif
 
 #ifndef PRINT_OS_DEBUG_INFO

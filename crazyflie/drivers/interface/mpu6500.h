@@ -31,7 +31,7 @@ THE SOFTWARE.
 #ifndef _MPU6500_H_
 #define _MPU6500_H_
 
-#include "i2cdev.h"
+/*#include "i2cdev.h"*/
 
 #define MPU6500_ADDRESS_AD0_LOW     0x68 // address pin low (GND), default for InvenSense evaluation board
 #define MPU6500_ADDRESS_AD0_HIGH    0x69 // address pin high (VCC)
@@ -422,7 +422,7 @@ THE SOFTWARE.
 
 // note: DMP code memory blocks defined at end of header file
 
-void mpu6500Init(I2C_Dev *i2cPort);
+void mpu6500Init(/*I2C_Dev *i2cPort*/); /* I2C Dev in FreeRTOS HAL not needed */
 bool mpu6500Test(void);
 
 bool mpu6500TestConnection();
