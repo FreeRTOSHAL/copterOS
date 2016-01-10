@@ -24,7 +24,6 @@ static void lc_shutdown(struct lc *lc) {
 	motor_set(lc->motor, MOTOR_PIN2, 0);
 	motor_set(lc->motor, MOTOR_PIN3, 0);
 	motor_set(lc->motor, MOTOR_PIN4, 0);
-	for(;;); /* Block in Intterrupt */
 }
 struct lc *lc_init(struct motor *motor) {
 	struct lc *lc = &lc0;
@@ -34,6 +33,9 @@ struct lc *lc_init(struct motor *motor) {
 	irq_clear(3);
 	irq_setPrio(3, 0xFF);
 	irq_enable(3);
+	irq_clear(0);
+	irq_setPrio(0, 0xFF);
+	irq_enable(0);
 #endif
 	return lc;
 }
@@ -46,8 +48,53 @@ void cpu2cpu_int3_isr(void) {
 	/* Emergency Shutdown */
 	irq_clear(3);
 	lc_shutdown(&lc0);
+	for(;;); /* Block in Intterrupt */
 }
+#if 0
+uint32_t *AIRCR = (uint32_t *) 0xE000ED0C;
+void (*bootloader)() = (void *) 0x1f03ec01;
 void cpu2cpu_int0_isr(void) {
 	/* jump Bootloader */
+	irq_clear(0);
+	lc_shutdown(&lc0);
+	*AIRCR |= (0x1 << 1);
+	bootloader();
+	for(;;); /* Never reach */
+}
+#endif
+/* 
+ * For Jump to Bootlaoder out of ISR, we use this Fake Stack
+ * The local Reset Register and Externel Reset Register will not work on VF610 
+ * Also the Exeption Reset Register
+ */
+uint32_t  booloaderFakeStack[] = {
+	[0] = 0x42424242, /* R0 */
+	[1] = 0x42424242, /* R1 */
+	[2] = 0x42424242, /* R2 */
+	[3] = 0x42424242, /* R3 */
+	[4] = 0x42424242, /* R12 */
+	[5] = 0x1f03ec01, /* LR Register set to Bootloader Entry Point */
+	[6] = 0x1f03ec01, /* Bootloader PC */
+	[7] = 0x01000000, /* XPSR */
+};
+__attribute__((naked)) void cpu2cpu_int0_isr(void) {
+	asm volatile (
+		"cpsid i" "\n"
+		"cpsid f" "\n"
+		"push {r0, r1, r2, r3, r4, lr}"
+	);
+	/* Shutdown all PWM */
+	irq_clear(0);
+	lc_shutdown(&lc0);
+	/* jump Bootloader */
+	asm volatile (
+		"pop {r0, r1, r2, r3, r4, lr}" "\n"
+		"ldr r2, =booloaderFakeStack" "\n"
+		"msr psp, r2" "\n"
+		"isb" "\n"
+		"msr msp, r2" "\n"
+		"isb" "\n"
+		"bx lr" "\n"
+	);
 }
 #endif

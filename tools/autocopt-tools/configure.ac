@@ -70,8 +70,6 @@ AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [Activiert Debugin]), [
 	AS_VAR_APPEND(CFLAGS, [ -g ])
 	AS_VAR_APPEND(CXXFLAGS, [ -g ])
 ],[
-	AS_VAR_APPEND(CFLAGS, [ -Ofast ])
-	AS_VAR_APPEND(CXXFLAGS, [ -Ofast ])
 ])
 
 AC_CONFIG_FILES([
