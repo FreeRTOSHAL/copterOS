@@ -24,6 +24,7 @@
  * pidctrl.c - Used to receive/answer requests from client and to receive updated PID values from client
  */
  
+#include <stdio.h>
 /* FreeRtos includes */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -31,83 +32,88 @@
 #include "crtp.h"
 #include "pidctrl.h"
 #include "pid.h"
+#include "commander.h"
+#include <linux_client.h>
+void pidCrtlCallback(struct lc *lc, struct lc_msg *msg);
 
-typedef enum {
-  pidCtrlValues = 0x00,
-} PIDCrtlNbr;
-
-void pidCrtlTask(void *param);
-
-void pidCtrlInit()
-{
-  xTaskCreate(pidCrtlTask, "PIDCrtl",
-              CONFIG_MINIMAL_STACK_SIZE, NULL, /*priority*/2, NULL);
-  /*crtpInitTaskQueue(6);*/ /* TODO */
+void pidCtrlInit() {
+	struct lc *lc = lc_init();
+	lc_registerCallback(lc, LC_TYPE_PID, &pidCrtlCallback);
 }
+extern PidObject pidRollRate;
+extern PidObject pidPitchRate;
+extern PidObject pidYawRate;
+extern PidObject pidRoll;
+extern PidObject pidPitch;
+extern PidObject pidYaw;
 
-void pidCrtlTask(void *param)
+#define PID_ATT_MODE_R 0
+#define PID_ATT_MODE_P 1
+#define PID_ATT_MODE_Y 2
+#define IS_BIT_SET(x, p) (((x) >> p) & 0x1)
+#define PID_RATE 0
+#define PID_ATT 1
+struct pidValuesHeader {
+	uint8_t type;
+	uint8_t mode;
+} __attribute__((packed));
+struct pidValues {
+	struct pidValuesHeader header;
+	uint16_t KpR;
+	uint16_t KiR;
+	uint16_t KdR;
+	uint16_t KpP;
+	uint16_t KiP;
+	uint16_t KdP;
+	uint16_t KpY;
+	uint16_t KiY;
+	uint16_t KdY;
+} __attribute__((packed));
+
+
+#define DEBUG_PID(ftm, ...) printf("PIDCTRL: " ftm, ##__VA_ARGS__)
+#define SETKP(p, v) do { DEBUG_PID(#p " " #v "=%f\n", (v)); pidSetKp((p), (v));} while(0)
+#define SETKI(p, v) do { DEBUG_PID(#p " " #v "=%f\n", (v)); pidSetKi((p), (v));} while(0)
+#define SETKD(p, v) do { DEBUG_PID(#p " " #v "=%f\n", (v)); pidSetKd((p), (v));} while(0)
+
+void pidCrtlCallback(struct lc *lc, struct lc_msg *msg)
 {
-  CRTPPacket p;
-  extern PidObject pidRollRate;
-  extern PidObject pidPitchRate;
-  extern PidObject pidYawRate;
-  extern PidObject pidRoll;
-  extern PidObject pidPitch;
-  extern PidObject pidYaw;
-  struct pidValues
-  {
-    uint16_t rateKpRP;
-    uint16_t rateKiRP;
-    uint16_t rateKdRP;
-    uint16_t attKpRP;
-    uint16_t attKiRP;
-    uint16_t attKdRP;
-    uint16_t rateKpY;
-    uint16_t rateKiY;
-    uint16_t rateKdY;
-    uint16_t attKpY;
-    uint16_t attKiY;
-    uint16_t attKdY;
-  }  __attribute__((packed));
-  struct pidValues *pPid;
+	struct pidValues *pPid = (struct pidValues *)msg->data;
+	switch (pPid->header.type) {
+		case PID_RATE:
+			DEBUG_PID("Set Rate:\n");
+			SETKP(&pidRollRate, (float)pPid->KpR/100.0);
+			SETKI(&pidRollRate, (float)pPid->KiR/100.0);
+			SETKD(&pidRollRate, (float)pPid->KdR/100.0);
+			SETKP(&pidPitchRate, (float)pPid->KpP/100.0);
+			SETKI(&pidPitchRate, (float)pPid->KiP/100.0);
+			SETKD(&pidPitchRate, (float)pPid->KdP/100.0);
+			SETKP(&pidYawRate, (float)pPid->KpY/100.0);
+			SETKI(&pidYawRate, (float)pPid->KiY/100.0);
+			SETKD(&pidYawRate, (float)pPid->KdY/100.0);
+			break;
+		case PID_ATT:
+			DEBUG_PID("Set ATT:\n");
+			SETKP(&pidRoll, (float)pPid->KpR/100.0);
+			SETKI(&pidRoll, (float)pPid->KiR/100.0);
+			SETKD(&pidRoll, (float)pPid->KdR/100.0);
+			SETKP(&pidPitch, (float)pPid->KpP/100.0);
+			SETKI(&pidPitch, (float)pPid->KiP/100.0);
+			SETKD(&pidPitch, (float)pPid->KdP/100.0);
+			SETKP(&pidYaw, (float)pPid->KpY/100.0);
+			SETKI(&pidYaw, (float)pPid->KiY/100.0);
+			SETKD(&pidYaw, (float)pPid->KdY/100.0);
+			break;
+		default:
+			DEBUG_PID("Error unkown type: %d", pPid->header.type);
+			break;
+	}
 
-  vTaskSuspend(NULL);
-
-  while (true)
-  {
-    /*if (crtpReceivePacketBlock(6, &p) == pdTRUE)*/ /* replace */
-    {
-      PIDCrtlNbr pidNbr = p.channel;
-      
-      switch (pidNbr)
-      {
-        case pidCtrlValues:
-          pPid = (struct pidValues *)p.data;
-          {
-            pidSetKp(&pidRollRate, (float)pPid->rateKpRP/100.0);
-            pidSetKi(&pidRollRate, (float)pPid->rateKiRP/100.0);
-            pidSetKd(&pidRollRate, (float)pPid->rateKdRP/100.0);
-            pidSetKp(&pidRoll, (float)pPid->attKpRP/100.0);
-            pidSetKi(&pidRoll, (float)pPid->attKiRP/100.0);
-            pidSetKd(&pidRoll, (float)pPid->attKdRP/100.0);
-            pidSetKp(&pidPitchRate, (float)pPid->rateKpRP/100.0);
-            pidSetKi(&pidPitchRate, (float)pPid->rateKiRP/100.0);
-            pidSetKd(&pidPitchRate, (float)pPid->rateKdRP/100.0);
-            pidSetKp(&pidPitch, (float)pPid->attKpRP/100.0);
-            pidSetKi(&pidPitch, (float)pPid->attKiRP/100.0);
-            pidSetKd(&pidPitch, (float)pPid->attKdRP/100.0);
-            pidSetKp(&pidYawRate, (float)pPid->rateKpY/100.0);
-            pidSetKi(&pidYawRate, (float)pPid->rateKiY/100.0);
-            pidSetKd(&pidYawRate, (float)pPid->rateKdY/100.0);
-            pidSetKp(&pidYaw, (float)pPid->attKpY/100.0);
-            pidSetKi(&pidYaw, (float)pPid->attKiY/100.0);
-            pidSetKd(&pidYaw, (float)pPid->attKdY/100.0);
-          }
-          break;
-        default:
-          break;
-      } 
-    }
-  }
+	commanderSetRPYType(
+		(RPYType) IS_BIT_SET(pPid->header.mode, PID_ATT_MODE_R), 
+		(RPYType) IS_BIT_SET(pPid->header.mode, PID_ATT_MODE_P), 
+		(RPYType) IS_BIT_SET(pPid->header.mode, PID_ATT_MODE_Y)
+	);
+	lc_sendAct(lc);
 }
 

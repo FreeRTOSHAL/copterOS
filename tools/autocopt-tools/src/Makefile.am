@@ -17,8 +17,14 @@
 #LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #THE SOFTWARE.
-bin_PROGRAMS=shutdown reset
+bin_PROGRAMS=shutdown reset ping clear pid
 shutdown_SOURCES=shutdown.c
 shutdown_CFLAGS=-I$(top_srcdir)/include
 reset_SOURCES=reset.c
 reset_CFLAGS=-I$(top_srcdir)/include
+ping_SOURCES=ping.c
+ping_CFLAGS=-I$(top_srcdir)/include
+clear_SOURCES=clear.c
+clear_CFLAGS=-I$(top_srcdir)/include
+pid_SOURCES=pid.c
+pid_CFLAGS=-I$(top_srcdir)/include

@@ -23,7 +23,9 @@
  *
  *
  */
-#define TUNE_PITCH
+//#define TUNE_PITCH
+//#define TUNE_ROLL
+//#define TUNE_YAW
 #include <math.h>
 
 #include "FreeRTOS.h"
@@ -66,15 +68,15 @@ static Axis3f gyro; // Gyro axis data in deg/s
 static Axis3f acc;  // Accelerometer axis data in mG
 static Axis3f mag;  // Magnetometer axis data in testla
 
-static float eulerRollActual;   // Measured roll angle in deg
-static float eulerPitchActual;  // Measured pitch angle in deg
-static float eulerYawActual;    // Measured yaw angle in deg
-static float eulerRollDesired;  // Desired roll angle in deg
-static float eulerPitchDesired; // Desired ptich angle in deg
-static float eulerYawDesired;   // Desired yaw angle in deg
-static float rollRateDesired;   // Desired roll rate in deg/s
-static float pitchRateDesired;  // Desired pitch rate in deg/s
-static float yawRateDesired;    // Desired yaw rate in deg/s
+float eulerRollActual;   // Measured roll angle in deg
+float eulerPitchActual;  // Measured pitch angle in deg
+float eulerYawActual;    // Measured yaw angle in deg
+float eulerRollDesired;  // Desired roll angle in deg
+float eulerPitchDesired; // Desired ptich angle in deg
+float eulerYawDesired;   // Desired yaw angle in deg
+float rollRateDesired;   // Desired roll rate in deg/s
+float pitchRateDesired;  // Desired pitch rate in deg/s
+float yawRateDesired;    // Desired yaw rate in deg/s
 
 // Baro variables
 static float temperature; // temp from barometer in celcius
@@ -129,7 +131,7 @@ static float autoTOTargetAdjust    = 1.5f;  // Meters to add to altHoldTarget to
 static float autoTOThresh          = 0.97f; // Threshold for when to deactivate auto Take-Off. A value of 0.97 means 97% of the target altitude adjustment.
 #endif
 
-static float carefreeFrontAngle = 0; // carefree front angle that is set
+float carefreeFrontAngle = 0; // carefree front angle that is set
 
 uint16_t actuatorThrust;  // Actuator output for thrust base
 int16_t  actuatorRoll;    // Actuator output roll compensation

@@ -36,8 +36,10 @@
 #include "imu.h"
 #include "mpu6500.h"
 
-#define CONFIG_CALLI_PITCH -1.42
-#define CONFIG_CALLI_ROLL -17.24
+#define CONFIG_CALLI_PITCH -0.32
+#define CONFIG_CALLI_ROLL -17.67
+//#define CONFIG_CALLI_PITCH 0
+//#define CONFIG_CALLI_ROLL 0
 
 //#define IMU_ENABLE_PRESSURE_LPS25H
 //#define IMU_ENABLE_MAG_AK8963
@@ -373,6 +375,7 @@ void imu6Read(Axis3f* gyroOut, Axis3f* accOut)
 
 bool imu6IsCalibrated(void)
 {
+#if 1
   bool status;
 
   status = gyroBias.isBiasValueFound;
@@ -381,6 +384,9 @@ bool imu6IsCalibrated(void)
 #endif
 
   return status;
+#else 
+  return false;
+#endif
 }
 
 void imu9Read(Axis3f* gyroOut, Axis3f* accOut, Axis3f* magOut)

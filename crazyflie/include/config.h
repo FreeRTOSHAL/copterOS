@@ -46,7 +46,9 @@
 
 #define PROTOCOL_VERSION 2
 
-#ifdef STM32F4XX
+#define STM32F4X //TODO
+
+#ifdef STM32F4X
   #define P_NAME "Crazyflie 2.0"
   #define QUAD_FORMATION_X
 
@@ -185,6 +187,8 @@
 #include "cfassert.h"
 /*void assert_failed(uint8_t* file, uint32_t line);*/
 #define assert_param(expr) ((expr) ? (void)0 : assertFail(#expr, __FILE__, __LINE__))
+
+/*#define IMU_TAKE_ACCEL_BIAS*/ /* TODO remove? */
 
 
 #endif /* CONFIG_H_ */

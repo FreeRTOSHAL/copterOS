@@ -1,0 +1,17 @@
+./pid -a 80 -b 0 -c 0 -d 70 -e 16.7 -e 0 -g 7 -h 3.5 -m alt -n alt
+./pid -a 80 -b 10 -d 70 -e 10 -m alt -n alt -g 9 -h 1.5 -j 5 -k 1 #bischen instabil
+./pid -a 90 -b 10 -d 80 -e 20 -m alt -n alt -g 8 -h 3 # stabilder -j und -k nicht verwendet!
+./pid -a 80 -b 3 -d 85 -e 20 -m alt -n alt -g 8.5 -h 2.5 # leichtes aufschauken bei kopf start
+./pid -a 85 -b 3 -d 90 -e 25 -m alt -n alt -g 8.7 -h 3 -k 3.5 -j 1.5 # j k mal rein genommen bisschen stabiler kein kopf test
+./pid -a 80 -b 0 -d 85 -e 25 -m alt -n alt -g 8 -h 3 -i 1.5 # leichtes schlingern
+./pid -a 80 -b 20 -d 85 -e 30 -m alt -n alt -g 8 -h 5 -i 0 # :S
+
+
+Torben Sessino:
+
+
+./pid -a 160 -b 20 #Roll Pithc
+./pid -a 160 -b 20 -d 80 -e 10 -m alt -n alt -g 5 # yaw and fisrt alt
+./pid -a 160 -b 20 -d 80 -e 10 -m alt -n alt -g 8 -h 10 # first i i may to big
+./pid -a 160 -b 20 -d 80 -e 10 -m alt -n alt -g 8 -h 5 -i 0
+

@@ -30,6 +30,7 @@
 
 #include "controller.h"
 #include "pid.h"
+#include "pidctrl.h"
 #include "param.h"
 #include "imu.h"
 
@@ -76,6 +77,7 @@ void controllerInit()
   pidSetIntegralLimit(&pidRoll, PID_ROLL_INTEGRATION_LIMIT);
   pidSetIntegralLimit(&pidPitch, PID_PITCH_INTEGRATION_LIMIT);
   pidSetIntegralLimit(&pidYaw, PID_YAW_INTEGRATION_LIMIT);
+  pidCtrlInit();
   
   isInit = true;
 }

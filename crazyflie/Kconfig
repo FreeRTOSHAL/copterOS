@@ -1,5 +1,5 @@
-config CRAZYFLIE
-	bool 
+menuconfig CRAZYFLIE
+	bool "Crazyflie"
 	select USE_APPLICATION_TASK_TAG
 	select USE_TIMERS
 	select SENSOR
@@ -7,3 +7,9 @@ config CRAZYFLIE
 	select ACCEL
 	select GYRO
 	default y
+	config PIDVALUES_CRAZYFLIE
+		bool "PID Values of Crazyflie"
+		depends on CRAZYFLIE
+	config PIDVALUES_TCM
+		bool "PID Values of TCM"
+		depends on CRAZYFLIE

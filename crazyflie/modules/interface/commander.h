@@ -63,11 +63,24 @@ void commanderWatchdog(void);
 uint32_t commanderGetInactivityTime(void);
 void commanderGetRPY(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired);
 void commanderGetRPYType(RPYType* rollType, RPYType* pitchType, RPYType* yawType);
+void commanderSetRPYType(RPYType rollType, RPYType pitchType, RPYType yawType);
 void commanderGetThrust(uint16_t* thrust);
 void commanderGetAltHold(bool* altHold, bool* setAltHold, float* altHoldChange);
 bool commanderGetAltHoldMode(void);
 void commanderSetAltHoldMode(bool altHoldModeNew);
 YawModeType commanderGetYawMode(void);
 bool commanderGetYawModeCarefreeResetFront(void);
+struct commander {
+	bool isInit;
+	bool isInactive;
+	bool thrustLocked;
+	struct rc *rc;
+	uint32_t rollID;
+	uint32_t pitchID;
+	uint32_t yawID;
+	uint32_t thrustID;
+};
+
+extern struct commander comm;
 
 #endif /* COMMANDER_H_ */

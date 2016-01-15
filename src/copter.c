@@ -18,7 +18,7 @@
 #include <spi.h>
 #include <adc.h>
 #include <tps65381.h>
-
+#include <display.h>
 
 #define RC_TIMER 3
 #define RC_PERIOD 24000
@@ -325,6 +325,7 @@ int main() {
 #endif
 	}
 	xTaskCreate(batTask, "Bat task", 512, NULL, 4, NULL);
+	display_init();
 	printf("Start Scheduler\n");
 	systemLaunch();
 	vTaskStartScheduler ();
