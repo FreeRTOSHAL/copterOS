@@ -59,12 +59,18 @@ AC_CHECK_HEADER([stdio.h],,AC_MSG_ERROR([stdio.h not found]))
 AC_CHECK_HEADER([stdlib.h],,AC_MSG_ERROR([stdlib.h not found]))
 AC_CHECK_HEADER([stdarg.h],,AC_MSG_ERROR([stdarg.h not found]))
 
+AC_PROG_CC
+AM_PROG_AR
 AC_PROG_CXX
+
+#init LIBTOOL
+LT_INIT()
 
 #Check Libs
 #Example: (That is only an example. It didn't work because sin is a build-in Funktion of gcc). 
 #For -lm add "progname_ldadd = -lm" in Makefile.am
 #AC_CHECK_LIB([m],[sin],,AC_MSG_ERROR([libm not found]))
+AC_CHECK_LIB([ncurses],[endwin],,AC_MSG_ERROR([libncurses not found]))
 
 AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [Activiert Debugin]), [
 	AS_VAR_APPEND(CFLAGS, [ -g ])

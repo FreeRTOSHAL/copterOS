@@ -8,43 +8,18 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <linux/autocopt.h>
+#include <autocopt/autocopt.h>
 /*
  * ARGP
  */
 #include <argp.h>
 
-#define DEVICE "/dev/copt0"
-#define BIT(x) (1 << x)
-#define PID_ATT_MODE_R 0
-#define PID_ATT_MODE_P 1
-#define PID_ATT_MODE_Y 2
-#define IS_BIT_SET(x, p) (((x) >> p) & 0x1)
-#define PID_RATE 0
-#define PID_ATT 1
-struct pidValuesHeader {
-        uint8_t type;
-        uint8_t mode;
-} __attribute__((packed));
-struct pidValues {
-        struct pidValuesHeader header;
-        uint16_t KpR;
-        uint16_t KiR;
-        uint16_t KdR;
-        uint16_t KpP;
-        uint16_t KiP;
-        uint16_t KdP;
-        uint16_t KpY;
-        uint16_t KiY;
-        uint16_t KdY;
-} __attribute__((packed));
-
 /**
  * Programm Agumente
  */
 struct arguments {
-	struct pidValues rate;
-	struct pidValues att;
+	struct autocopt_pidValues rate;
+	struct autocopt_pidValues att;
 	uint8_t mode;
 };
 /**
@@ -159,31 +134,31 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 			break;
 		case 'm':
 			if (strcmp(arg, "rate") == 0) {
-				args->mode &= ~BIT(PID_ATT_MODE_R);
-			} else if (strcmp(arg, "alt") == 0) {
-				args->mode |= BIT(PID_ATT_MODE_R);
+				args->mode &= ~AUTOCOPT_PID_ANGLE_MODE_R;
+			} else if (strcmp(arg, "angel") == 0) {
+				args->mode |= AUTOCOPT_PID_ANGLE_MODE_R;
 			} else {
-				fprintf(stderr, "Mode shall rate or alt");
+				fprintf(stderr, "Mode shall rate or angel");
 				argp_usage(state);
 			}
 			break;
 		case 'n':
 			if (strcmp(arg, "rate") == 0) {
-				args->mode &= ~BIT(PID_ATT_MODE_P);
-			} else if (strcmp(arg, "alt") == 0) {
-				args->mode |= BIT(PID_ATT_MODE_P);
+				args->mode &= ~AUTOCOPT_PID_ANGLE_MODE_P;
+			} else if (strcmp(arg, "angel") == 0) {
+				args->mode |= AUTOCOPT_PID_ANGLE_MODE_P;
 			} else {
-				fprintf(stderr, "Mode shall rate or alt");
+				fprintf(stderr, "Mode shall rate or angel");
 				argp_usage(state);
 			}
 			break;
 		case 'o':
 			if (strcmp(arg, "rate") == 0) {
-				args->mode &= ~BIT(PID_ATT_MODE_Y);
-			} else if (strcmp(arg, "alt") == 0) {
-				args->mode |= BIT(PID_ATT_MODE_Y);
+				args->mode &= ~AUTOCOPT_PID_ANGLE_MODE_Y;
+			} else if (strcmp(arg, "angel") == 0) {
+				args->mode |= AUTOCOPT_PID_ANGLE_MODE_Y;
 			} else {
-				fprintf(stderr, "Mode shall rate or alt");
+				fprintf(stderr, "Mode shall rate or angel");
 				argp_usage(state);
 			}
 			break;
@@ -236,8 +211,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 }
 
 int main(int argc, char **argv) {
-	int fd;
-	int ret;
+	int32_t ret;
+	struct autocopt *copt;
 	struct autocopt_msg msg = {
 		.type = AUTOCOPT_TYPE_PID,
 	};
@@ -263,49 +238,29 @@ int main(int argc, char **argv) {
 			exit(EXIT_FAILURE);
 		}
 	}
-	fd = open(DEVICE, O_RDWR);
-	if (fd < 0) {
-		perror("open");
-		exit(EXIT_FAILURE);
+	copt = autocopt_init(AUTOCOPT_DEFAULT_DEV);
+	if (copt == NULL) {
+		goto main_error0;
 	}
-	memset(msg.data, 42, 31 * sizeof(char));
-	args.rate.header.type = PID_RATE;
+	args.rate.header.type = AUTOCOPT_PID_TYPE_RATE;
 	args.rate.header.mode = args.mode;
-	msg.type = AUTOCOPT_TYPE_PID;
-	memcpy(msg.data, &args.rate, sizeof(struct pidValues));
 	printf("Send PID rate Config\n");
-	ret = write(fd, &msg, sizeof(struct autocopt_msg));
+	ret = autocopt_pid(copt, &args.rate);
 	if (ret < 0) {
-		perror("write");
-		return EXIT_FAILURE;
+		goto main_error1;
 	}
-	ret = read(fd, &msg, sizeof(struct autocopt_msg));
-	if (ret < 0) {
-		perror("read");
-		return EXIT_FAILURE;
-	}
-	printf("Act Resived\n");
-	memset(msg.data, 42, 31 * sizeof(char));
-	msg.type = AUTOCOPT_TYPE_PID;
-	args.att.header.type = PID_ATT;
+	args.att.header.type = AUTOCOPT_PID_TYPE_ANGLE;
 	args.att.header.mode = args.mode;
-	memcpy(msg.data, &args.att, sizeof(struct pidValues));
+	memcpy(msg.data, &args.att, sizeof(struct autocopt_pidValues));
 	printf("Send PID att Config\n");
-	ret = write(fd, &msg, sizeof(struct autocopt_msg));
+	ret = autocopt_pid(copt, &args.att);
 	if (ret < 0) {
-		perror("write");
-		return EXIT_FAILURE;
+		goto main_error1;
 	}
-	ret = read(fd, &msg, sizeof(struct autocopt_msg));
-	if (ret < 0) {
-		perror("read");
-		return EXIT_FAILURE;
-	}
-	printf("Act Resived\n");
-	ret = close(fd);
-	if (ret < 0) {
-		perror("close");
-		exit(EXIT_FAILURE);
-	}
+	autocopt_deinit(copt);
 	return EXIT_SUCCESS;
+main_error1:
+	autocopt_deinit(copt);
+main_error0:
+	return EXIT_FAILURE;
 }

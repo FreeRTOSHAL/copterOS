@@ -8,37 +8,23 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <linux/autocopt.h>
+#include <autocopt/autocopt.h>
 
-#define DEVICE "/dev/copt0"
 int main(int argc, char **argv) {
-	int fd;
-	int ret;
-	struct autocopt_msg msg = {
-		.type = AUTOCOPT_TYPE_ACT,
-	};
-	memset(msg.data, 42, 31 * sizeof(char));
-	fd = open(DEVICE, O_RDWR);
-	if (fd < 0) {
-		perror("open");
-		exit(EXIT_FAILURE);
-	}
-	printf("Ping\n");
-	ret = write(fd, &msg, sizeof(struct autocopt_msg));
-	if (ret < 0) {
-		perror("write");
+	int32_t ret;
+	struct autocopt *copt = autocopt_init(AUTOCOPT_DEFAULT_DEV);
+	if (copt == NULL) {
+		fprintf(stderr, "Can't create autocopt\n");
+		autocopt_deinit(copt);
 		return EXIT_FAILURE;
 	}
-	ret = read(fd, &msg, sizeof(struct autocopt_msg));
+	ret = autocopt_ping(copt);
 	if (ret < 0) {
-		perror("read");
+		fprintf(stderr, "Copter not alive\n");
+		autocopt_deinit(copt);
 		return EXIT_FAILURE;
 	}
-	printf("Pong\n");
-	ret = close(fd);
-	if (ret < 0) {
-		perror("close");
-		exit(EXIT_FAILURE);
-	}
+	printf("Copter alive\n");
+	autocopt_deinit(copt);
 	return EXIT_SUCCESS;
 }
