@@ -1,4 +1,4 @@
-obj-y += utils/ 
-obj-y += modules/
-obj-y += hal/ 
-obj-y += drivers/
+obj-$(CONFIG_CRAZYFLIE) += utils/ 
+obj-$(CONFIG_CRAZYFLIE) += modules/
+obj-$(CONFIG_CRAZYFLIE) += hal/ 
+obj-$(CONFIG_CRAZYFLIE) += drivers/

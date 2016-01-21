@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include <remote_control.h>
+#include <linux_client.h>
 
 #include "commander.h"
 
@@ -59,13 +61,26 @@ static RPYType stabilizationModeYaw   = RATE;  // Current stabilization type of 
 
 static YawModeType yawMode = DEFUALT_YAW_MODE; // Yaw mode configuration
 
+
+
+static void spectrumGetThrust(uint16_t* thrust);
+static void spectrumGetRPY(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired);
+void (*getThrust)(uint16_t* thrust) = &spectrumGetThrust;
+void (*getRPY)(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired) = &spectrumGetRPY;
+
+static void lc_select(struct lc *lc, struct lc_msg *msg);
+static void lc_control(struct lc *lc, struct lc_msg *msg);
 void commanderInit(void) {
+	struct lc *lc = lc_init();
 	if(comm.isInit)
 		return;
 	
 	comm.thrustLocked = true;
 	comm.isInit = true;
 	comm.rc = rc_init(NULL); /* TODO: Init is in main */
+	
+	lc_registerCallback(lc, LC_TYPE_SELECT, lc_select);
+	lc_registerCallback(lc, LC_TYPE_CONTROL, lc_control);
 }
 bool commanderTest(void) {
 	return comm.isInit && comm.rc != NULL;
@@ -88,6 +103,9 @@ static inline float getPercent(float value, const float base, const float min, c
 }
 
 void commanderGetRPY(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired) {
+	getRPY(eulerRollDesired, eulerPitchDesired,eulerYawDesired);
+}
+static void spectrumGetRPY(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired) {
 #if 1
 	float roll = (float) rc_get(comm.rc, comm.rollID);
 	float pitch = (float) rc_get(comm.rc, comm.pitchID);
@@ -142,6 +160,9 @@ void commanderSetRPYType(RPYType rollType, RPYType pitchType, RPYType yawType) {
 	stabilizationModeYaw = yawType;
 }
 void commanderGetThrust(uint16_t* thrust) {
+	getThrust(thrust);
+}
+static void spectrumGetThrust(uint16_t* thrust) {
 	float y = (float) rc_get(comm.rc, comm.yawID);
 	float t = (float) rc_get(comm.rc, comm.thrustID);
 	if (t == 0 || y == 0) {
@@ -176,4 +197,87 @@ YawModeType commanderGetYawMode(void) {
 }
 bool commanderGetYawModeCarefreeResetFront(void) {
 	return false;
+}
+
+void commanderSelectSpectrum(void) {
+	getThrust = &spectrumGetThrust;
+	getRPY = &spectrumGetRPY;
+}
+/**
+ * Autocopt Control Message
+ */
+struct autocopt_control {
+	/**
+	 * -1 left +1 right
+	 */ 
+	float roll;
+	/**
+	 * -1 back +1 forward
+	 */
+	float pitch;
+	/**
+	 * -1 left +1 right
+	 */
+	float yaw;
+	/**
+	 * 0 = no Thrust
+	 * 2^16 = full Thrust
+	 * \waring Value below 60000 the copter may instable 
+	 */
+	uint16_t thrust;
+} __attribute__((packed));
+
+struct autocopt_control ctl;
+static void lc_control(struct lc *lc, struct lc_msg *msg) {
+	memcpy(&ctl, msg->data, sizeof(struct autocopt_control));
+	lc_sendAct(lc);
+}
+static void linuxGetRPY(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired) {
+#if 1
+	float roll;
+	float pitch;
+	float yaw;
+	roll = ctl.roll;
+	pitch = -ctl.pitch;
+	yaw = ctl.yaw;
+
+	*eulerRollDesired = (roll * EULER_ROLL_MAX);
+	*eulerPitchDesired = (pitch * EULER_PITCH_MAX);
+	*eulerYawDesired = (yaw * EULER_YAW_MAX);
+#else
+	*eulerRollDesired = 0;
+	*eulerPitchDesired = 0;
+	*eulerYawDesired = 0;
+#endif
+
+	//printf("roll: %f pitch: %f yaw: %f\n", *eulerRollDesired, *eulerPitchDesired, *eulerYawDesired);
+}
+static void linuxGetThrust(uint16_t* thrust) {
+	if (comm.thrustLocked && ctl.thrust == 0) {
+		comm.thrustLocked = false;
+	}
+	if (comm.thrustLocked) {
+		*thrust = 0;
+		return;
+	}
+	*thrust = ctl.thrust;
+}
+void commanderSelectLinux(void) {
+	getThrust = &linuxGetThrust;
+	getRPY = &linuxGetRPY;
+}
+static void lc_select(struct lc *lc, struct lc_msg *msg) {
+	comm.thrustLocked = true;
+	switch (msg->data[0]) {
+		case 0: /* Move to DEFINE */
+			commanderSelectSpectrum();
+			break;
+		case 1:
+			commanderSelectLinux();
+			break;
+		default:
+			lc_SendFailt(lc);
+			return;
+	}
+	lc_sendAct(lc);
 }

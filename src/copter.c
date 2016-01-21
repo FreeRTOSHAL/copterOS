@@ -325,9 +325,13 @@ int main() {
 #endif
 	}
 	xTaskCreate(batTask, "Bat task", 512, NULL, 4, NULL);
+#ifdef CONFIG_DISPALY
 	display_init();
+#endif
 	printf("Start Scheduler\n");
+#ifdef CONFIG_CRAZYFLIE
 	systemLaunch();
+#endif
 	vTaskStartScheduler ();
 	for(;;);
 	return 0;

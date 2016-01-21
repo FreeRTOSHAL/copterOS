@@ -35,10 +35,21 @@ static void lc_shutdown(struct lc *lc) {
 void lcTask(void *data);
 void lc_ping(struct lc *lc, struct lc_msg *msg) {
 	int32_t ret;
+	msg->type = LC_TYPE_ACT;
 	ret = lc_send(lc, msg);
 	if (ret < 0) {
 		printf("Can't not Send");
 	}
+}
+int32_t lc_SendFailt(struct lc *lc) {
+	int32_t ret;
+	struct lc_msg msg;
+	msg.type = LC_TYPE_FAILT;
+	ret = lc_send(lc, &msg);
+	if (ret < 0) {
+		return -1;
+	}
+	return 0;
 }
 struct lc *lc_init(struct motor *motor) {
 	struct lc *lc = &lc0;
@@ -66,6 +77,12 @@ struct lc *lc_init(struct motor *motor) {
 	xTaskCreate(lcTask, "Linux Client", 500, lc, 2, NULL);
 	lc->init = true;
 	lc_registerCallback(lc, LC_TYPE_ACT, lc_ping);
+	lc_registerCallback(lc, LC_TYPE_FAILT, lc_ping);
+#ifndef CONFIG_CRAZYFLIE
+	lc_registerCallback(lc, LC_TYPE_PID, lc_ping);
+	lc_registerCallback(lc, LC_TYPE_SELECT, lc_ping);
+	lc_registerCallback(lc, LC_TYPE_CONTROL, lc_ping);
+#endif
 	return lc;
 }
 int32_t lc_registerCallback(struct lc *lc, uint8_t type, void (*callback)(struct lc *lc, struct lc_msg *msg)) {
@@ -93,10 +110,12 @@ void lcTask(void *data) {
 		if (msg.type < LC_COUNT) {
 			if (lc->callbacks[msg.type] != NULL) {
 				lc->callbacks[msg.type](lc, &msg);
+			} else {
+				lc_SendFailt(lc);
 			}
 		} else {
 			printf("Recv Unkown Type: %d\n", msg.type);
-			/* TODO Error */
+			lc_SendFailt(lc);
 			continue;
 		}
 	}
