@@ -224,11 +224,22 @@ struct autocopt_control {
 	 * 2^16 = full Thrust
 	 * \waring Value below 60000 the copter may instable 
 	 */
-	uint16_t thrust;
+	float thrust;
 } __attribute__((packed));
 
-struct autocopt_control ctl;
+struct autocopt_control ctl = {0,0,0,-1};
 static void lc_control(struct lc *lc, struct lc_msg *msg) {
+	struct autocopt_control *copt = (struct autocopt_control *) msg->data;
+	if (
+		copt->roll < -1 || copt->roll > 1 ||
+		copt->pitch < -1 || copt->pitch > 1 ||
+		copt->yaw < -1 || copt->yaw > 1 ||
+		copt->thrust < -1 || copt->thrust > 1
+	) {
+		lc_sendFailt(lc);
+		return;
+	}
+	printf("roll: %f pitch: %f yaw: %f thrust: %f\n", copt->roll, copt->pitch, copt->yaw, copt->thrust);
 	memcpy(&ctl, msg->data, sizeof(struct autocopt_control));
 	lc_sendAct(lc);
 }
@@ -253,14 +264,19 @@ static void linuxGetRPY(float* eulerRollDesired, float* eulerPitchDesired, float
 	//printf("roll: %f pitch: %f yaw: %f\n", *eulerRollDesired, *eulerPitchDesired, *eulerYawDesired);
 }
 static void linuxGetThrust(uint16_t* thrust) {
-	if (comm.thrustLocked && ctl.thrust == 0) {
+	float t;
+	if (comm.thrustLocked && ctl.thrust == -1) {
 		comm.thrustLocked = false;
 	}
 	if (comm.thrustLocked) {
 		*thrust = 0;
 		return;
 	}
-	*thrust = ctl.thrust;
+	t = ctl.thrust;
+	t += 1;
+	t /= 2;
+
+	*thrust = t * UINT16_MAX;
 }
 void commanderSelectLinux(void) {
 	getThrust = &linuxGetThrust;
@@ -278,7 +294,7 @@ static void lc_select(struct lc *lc, struct lc_msg *msg) {
 			commanderSelectLinux();
 			break;
 		default:
-			lc_SendFailt(lc);
+			lc_sendFailt(lc);
 			return;
 	}
 	lc_sendAct(lc);

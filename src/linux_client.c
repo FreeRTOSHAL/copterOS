@@ -41,7 +41,7 @@ void lc_ping(struct lc *lc, struct lc_msg *msg) {
 		printf("Can't not Send");
 	}
 }
-int32_t lc_SendFailt(struct lc *lc) {
+int32_t lc_sendFailt(struct lc *lc) {
 	int32_t ret;
 	struct lc_msg msg;
 	msg.type = LC_TYPE_FAILT;
@@ -111,11 +111,11 @@ void lcTask(void *data) {
 			if (lc->callbacks[msg.type] != NULL) {
 				lc->callbacks[msg.type](lc, &msg);
 			} else {
-				lc_SendFailt(lc);
+				lc_sendFailt(lc);
 			}
 		} else {
 			printf("Recv Unkown Type: %d\n", msg.type);
-			lc_SendFailt(lc);
+			lc_sendFailt(lc);
 			continue;
 		}
 	}

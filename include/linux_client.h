@@ -23,6 +23,6 @@ struct lc *lc_init();
 int32_t lc_registerCallback(struct lc *lc, uint8_t type, void (*callback)(struct lc *lc, struct lc_msg *msg));
 int32_t lc_send(struct lc *lc, struct lc_msg *msg);
 int32_t lc_sendAct(struct lc *lc);
-int32_t lc_SendFailt(struct lc *lc);
+int32_t lc_sendFailt(struct lc *lc);
 int32_t lc_deinit(struct lc *lc);
 #endif
