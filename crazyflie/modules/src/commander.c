@@ -267,7 +267,9 @@ void commanderSelectLinux(void) {
 	getRPY = &linuxGetRPY;
 }
 static void lc_select(struct lc *lc, struct lc_msg *msg) {
+#ifdef CONFIG_SELECT_THRUST_LOCKED
 	comm.thrustLocked = true;
+#endif
 	switch (msg->data[0]) {
 		case 0: /* Move to DEFINE */
 			commanderSelectSpectrum();

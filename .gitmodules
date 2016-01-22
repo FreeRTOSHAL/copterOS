@@ -13,3 +13,6 @@
 [submodule "arch"]
 	path = arch
 	url = git@scuderia.cs.hs-rm.de:fhal/fhal-arch.git
+[submodule "tools/autocopt-tools"]
+	path = tools/autocopt-tools
+	url = git@scuderia.cs.hs-rm.de:fhal/fhal-libcopt.git
