@@ -19,6 +19,8 @@
 #include <adc.h>
 #include <tps65381.h>
 #include <display.h>
+#include <rc_commander.h>
+#include <linux_commander.h>
 
 #define RC_TIMER 3
 #define RC_PERIOD 24000
@@ -232,7 +234,12 @@ int main() {
 	struct timer *ftm;
 	struct pwm *pwm;
 	struct uart *uart = uart_init(1, 115200);
+#ifdef CONFIG_LC
 	struct lc *lc;
+#endif
+#ifdef CONFIG_RC
+	struct rc *rc;
+#endif
 #ifdef CONFIG_NEWLIB
 	ret = newlib_init(uart, uart);
 	CONFIG_ASSERT(ret == 0);
@@ -275,14 +282,17 @@ int main() {
 		motor_set(motor, MOTOR_PIN4, 1100);
 #endif
 	}
+#ifdef CONFIG_LC
 	{
 		lc = lc_init(motor);
 		CONFIG_ASSERT(lc != NULL);
 	}
+#endif
+#ifdef CONFIG_RC
 	{
 		struct timer *timer = timer_init(1, 32, 20000, 700);
 		CONFIG_ASSERT(timer != NULL);
-		struct rc *rc = rc_init(timer);
+		rc = rc_init(timer);
 		CONFIG_ASSERT(rc != NULL);
 		{
 			struct capture *cap = capture_init(RC_PIN1);
@@ -320,10 +330,25 @@ int main() {
 			ret = rc_setup(rc, cap);
 			CONFIG_ASSERT(ret >= 0);
 		}
-#ifdef CONFIG_RC_MOTORTEST
+# ifdef CONFIG_RC_MOTORTEST
 		xTaskCreate(rcTestTask, "RC Test task", 512, rc, 1, NULL);
-#endif
+# endif
 	}
+#endif
+#ifdef CONFIG_LC_COMMANDER
+	{
+		struct linuxComm *linuxComm;
+		linuxComm = linuxComm_init(lc);
+		CONFIG_ASSERT(linuxComm != NULL);
+	}
+#endif
+#ifdef CONFIG_RC_COMMANDER
+	{
+		struct rcComm *rcComm;
+		rcComm = rcComm_init(rc);
+		CONFIG_ASSERT(rcComm != NULL);
+	}
+#endif
 	xTaskCreate(batTask, "Bat task", 512, NULL, 4, NULL);
 #ifdef CONFIG_DISPALY
 	display_init();

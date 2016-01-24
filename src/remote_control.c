@@ -88,7 +88,7 @@ struct rc *rc_init(struct timer *timer) {
 		return rc;
 	}
 	if (timer == NULL) {
-		return NULL;
+		goto rc_init_error_0;
 	}
 	memset(rc, 0, sizeof(struct rc));
 	rc->init = true;

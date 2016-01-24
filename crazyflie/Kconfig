@@ -13,8 +13,3 @@ menuconfig CRAZYFLIE
 	config PIDVALUES_TCM
 		bool "PID Values of TCM"
 		depends on CRAZYFLIE
-	config SELECT_THRUST_LOCKED
-		bool "Thrust Locked to 0 on switch"
-		depends on CRAZYFLIE
-		help 
-			Thrust Locked to 0 on switch from Spectrum to Linux Contoll

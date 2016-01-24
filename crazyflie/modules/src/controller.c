@@ -77,7 +77,9 @@ void controllerInit()
   pidSetIntegralLimit(&pidRoll, PID_ROLL_INTEGRATION_LIMIT);
   pidSetIntegralLimit(&pidPitch, PID_PITCH_INTEGRATION_LIMIT);
   pidSetIntegralLimit(&pidYaw, PID_YAW_INTEGRATION_LIMIT);
+#ifdef CONFIG_LC
   pidCtrlInit();
+#endif
   
   isInit = true;
 }

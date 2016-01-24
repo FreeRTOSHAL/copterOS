@@ -1,1 +1,2 @@
-obj-y := imu.o pm.o
+obj-y := imu.o
+#obj-y := pm.o

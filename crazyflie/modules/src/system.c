@@ -93,7 +93,7 @@ void systemInit(void)
 
   /* Initialized hear and early so that DEBUG_PRINT (buffered) can be used early */
   /*crtpInit();*/ /* TODO replace */
-  consoleInit();
+  /*consoleInit();*/ /* TODO replace */
 
   DEBUG_PRINT("----------------------------\n");
   DEBUG_PRINT(P_NAME " is up and running!\n");
@@ -104,7 +104,7 @@ void systemInit(void)
               *((int*)(MCU_ID_ADDRESS+0)), *((short*)(MCU_FLASH_SIZE_ADDRESS)));*/
 
   /*configblockInit();*/
-  workerInit();
+  /*workerInit();*/ /*TODO*/
   /*adcInit();*/
   /*ledseqInit();
   pmInit();*/
@@ -121,7 +121,7 @@ bool systemTest()
 #endif
   /*pass &= ledseqTest();
   pass &= pmTest();*/
-  pass &= workerTest();
+  /*pass &= workerTest();*/
 
   return pass;
 }
@@ -213,11 +213,13 @@ void systemTask(void *arg)
   }
   /*DEBUG_PRINT("Free heap: %d bytes\n", xPortGetFreeHeapSize());*/ /* TODO */
 
-  workerLoop();
-
+  /*workerLoop();*/
+  vTaskSuspend(NULL); /* Replace block below */
+#if 0
   //Should never reach this point!
   while(1)
     vTaskDelay(portMAX_DELAY);
+#endif
 }
 
 

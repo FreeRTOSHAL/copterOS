@@ -38,6 +38,10 @@
 #define COMMANDER_WDT_TIMEOUT_STABALIZE  M2T(500)
 #define COMMANDER_WDT_TIMEOUT_SHUTDOWN   M2T(2000)
 
+#define EULER_ROLL_MAX 15.
+#define EULER_PITCH_MAX 15.
+#define EULER_YAW_MAX 130.
+
 /**
  * Stabilization modes for Roll, Pitch, Yaw.
  */
@@ -70,17 +74,8 @@ bool commanderGetAltHoldMode(void);
 void commanderSetAltHoldMode(bool altHoldModeNew);
 YawModeType commanderGetYawMode(void);
 bool commanderGetYawModeCarefreeResetFront(void);
-struct commander {
-	bool isInit;
-	bool isInactive;
-	bool thrustLocked;
-	struct rc *rc;
-	uint32_t rollID;
-	uint32_t pitchID;
-	uint32_t yawID;
-	uint32_t thrustID;
-};
 
-extern struct commander comm;
+void commanderSetThrust(void (*callback)(uint16_t* thrust));
+void commanderSetRPY(void (*callback)(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired));
 
 #endif /* COMMANDER_H_ */

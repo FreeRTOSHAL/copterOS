@@ -1,10 +1,10 @@
 #obj-y += abort.o 
-obj-y += cfassert.o
+#obj-y += cfassert.o
 #obj-y += configblockeeprom.o
 #obj-y += configblockflash.o
 #obj-y += cpuid.o
-obj-y += crc.o
-obj-y += debug.o
+#obj-y += crc.o
+#obj-y += debug.o
 #obj-y += eprintf.o
 obj-y += filter.o
 #obj-y += fp16.o

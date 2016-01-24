@@ -2,9 +2,6 @@ menu "Aplication Settings"
 config MOTORTEST
 	bool "Motor Test: Warinung Motor speed up to maximum"
 	default n
-config RC_MOTORTEST
-	bool "Motor Test over RC"
-	default n
 config MOTOR_OFF
 	bool "Init PWM only"
 	default n
@@ -12,6 +9,50 @@ config DISPLAY
 	bool "Activate Display"
 	default n
 	depends on CRAZYFLIE
+config RC
+	bool "Activate Remote Control by Spectrum Receiver"
+	depends on CAPTURE
+	default y
+	help
+		Activate Remote Control by Spectrum Receiver
+	config RC_COMMANDER
+		bool "Activate Remote Contol Commander"
+		default y
+		depends on CRAZYFLIE && RC
+		help
+			Activate Remote Control Commander over Spectrum Receiver
+	config RC_MOTORTEST
+		depends on RC
+		bool "Motor Test over RC"
+		default n
+config LC
+	bool "Activate Linux Client over Buffer Driver"
+	depends on BUFFER 
+	default y
+	config LC_COMMANDER
+		bool "Activate Linux Commander"
+		default y
+		depends on CRAZYFLIE && LC
+		help
+			Activate Linux Commander over Buffer Driver
+
+comment "Warning no Receiver select"
+	depends on CRAZYFLIE && (!LC_COMMANDER && !RC_COMMANDER)
+choice 
+	prompt "Select Default Receiver"
+	depends on CRAZYFLIE && (RC_COMMANDER || LC_COMMANDER)
+	config DEFAULT_RC_SPECTRUM
+		bool "Spectrum Receiver"
+		depends on RC_COMMANDER
+		help
+			Default RC is Spectrum Receiver
+	config DEFAULT_RC_LINUX
+		bool "Linux Receiver"
+		depends on BUFFER
+		depends on LC_COMMANDER
+		help
+			Default RC is Linux Receiver
+endchoice
 config APP_INCLUDE
 	string
 	default "-Icrazyflie/include/ -Icrazyflie/modules/interface/ -Icrazyflie/hal/interface/ -Icrazyflie/utils/interface/ -Icrazyflie/drivers/interface/"
