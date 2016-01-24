@@ -1,4 +1,4 @@
-obj-y = copter.o motor_ctrl.o
+obj-y = copter.o motor_ctrl.o emergency.o
 obj-$(CONFIG_RC) += remote_control.o
 obj-$(CONFIG_LC) += linux_client.o
 obj-$(CONFIG_RC_COMMANDER) += rc_commander.o

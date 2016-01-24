@@ -7,16 +7,10 @@
 #include <string.h>
 #include <irq.h>
 #include <buffer.h>
-
-/* TODO Move to config */
-#define MOTOR_PIN1 3
-#define MOTOR_PIN2 6
-#define MOTOR_PIN3 2
-#define MOTOR_PIN4 0
+#include <emergency.h>
 
 struct lc {
 	bool init;
-	struct motor *motor;
 	struct buffer *rx;
 	struct buffer *tx;
 	void (*callbacks[LC_COUNT])(struct lc *lc, struct lc_msg *msg);
@@ -25,12 +19,7 @@ struct lc {
 #define BUFFER_TX ((struct buffer_base *) 0x3F07DE50)
 struct lc lc0;
 static void lc_shutdown(struct lc *lc) {
-	vTaskSuspendAll(); /* Stop all Tasks */
-	taskDISABLE_INTERRUPTS(); /* Disable all Interrupts */
-	motor_set(lc->motor, MOTOR_PIN1, 0);
-	motor_set(lc->motor, MOTOR_PIN2, 0);
-	motor_set(lc->motor, MOTOR_PIN3, 0);
-	motor_set(lc->motor, MOTOR_PIN4, 0);
+	emergency_shutdown();
 }
 void lcTask(void *data);
 void lc_ping(struct lc *lc, struct lc_msg *msg) {
@@ -51,13 +40,16 @@ int32_t lc_sendFailt(struct lc *lc) {
 	}
 	return 0;
 }
+void lc_emergency(struct lc *lc, struct lc_msg *msg) {
+	emergency_landing();
+	lc_sendAct(lc);
+}
 struct lc *lc_init(struct motor *motor) {
 	struct lc *lc = &lc0;
 	if (lc->init) {
 		return lc;
 	}
 	memset(lc, 0, sizeof(struct lc));
-	lc->motor = motor;
 	lc->rx = buffer_init(BUFFER_RX, 8, 32, true, 2);
 	if (lc->rx == NULL) {
 		return NULL;
@@ -78,6 +70,7 @@ struct lc *lc_init(struct motor *motor) {
 	lc->init = true;
 	lc_registerCallback(lc, LC_TYPE_ACT, lc_ping);
 	lc_registerCallback(lc, LC_TYPE_FAILT, lc_ping);
+	lc_registerCallback(lc, LC_TYPE_EMERGENCY, lc_emergency);
 #ifndef CONFIG_CRAZYFLIE
 	lc_registerCallback(lc, LC_TYPE_PID, lc_ping);
 	lc_registerCallback(lc, LC_TYPE_SELECT, lc_ping);

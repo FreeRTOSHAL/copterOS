@@ -35,7 +35,7 @@ void commanderInit(void) {
 	if(comm.isInit)
 		return;
 	
-	comm.thrustLocked = true;
+	comm.thrustLocked = false;
 	comm.isInit = true;
 }
 bool commanderTest(void) {
@@ -88,8 +88,15 @@ bool commanderGetYawModeCarefreeResetFront(void) {
 	return false;
 }
 
-void commanderSetThrust(void (*callback)(uint16_t* thrust)) {
+void commanderLockThrust(void (*callback)(uint16_t* thrust), bool lock) {
+	comm.thrustLocked = lock; /* Fist lock and then set */
 	comm.getThrust = callback;
+}
+
+void commanderSetThrust(void (*callback)(uint16_t* thrust)) {
+	if (comm.thrustLocked) {
+		comm.getThrust = callback;
+	}
 }
 void commanderSetRPY(void (*callback)(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired)) {
 	comm.getRPY = callback;

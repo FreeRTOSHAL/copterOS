@@ -9,6 +9,7 @@
 #define LC_TYPE_PID 0x2
 #define LC_TYPE_SELECT 0x3
 #define LC_TYPE_CONTROL 0x4
+#define LC_TYPE_EMERGENCY 0x5
 
 #define LC_COUNT (LC_TYPE_CONTROL + 1)
 #define LC_BUFFER_SIZE 8

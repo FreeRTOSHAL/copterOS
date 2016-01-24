@@ -75,6 +75,7 @@ void commanderSetAltHoldMode(bool altHoldModeNew);
 YawModeType commanderGetYawMode(void);
 bool commanderGetYawModeCarefreeResetFront(void);
 
+void commanderLockThrust(void (*callback)(uint16_t* thrust), bool lock);
 void commanderSetThrust(void (*callback)(uint16_t* thrust));
 void commanderSetRPY(void (*callback)(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired));
 
