@@ -74,6 +74,7 @@ static void displayTask(void *data) {
 		PRINT_VAL("%lu", motorPowerM3);
 		PRINT_VAL("%lu", motorPowerM4);
 		printf("\n");
+#if 0
 		{
 			float roll = (float) rc_get(comm.rc, comm.rollID);
 			float pitch = (float) rc_get(comm.rc, comm.pitchID);
@@ -85,6 +86,7 @@ static void displayTask(void *data) {
 			PRINT_VAL("%f", yaw);
 			PRINT_VAL("%f", thrust);
 		}
+#endif
 		printf("\n");
 		{
 			float commanderR;

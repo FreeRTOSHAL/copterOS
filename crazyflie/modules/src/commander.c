@@ -25,7 +25,7 @@ static struct commander comm = {
 	.isInit = false,
 	.stabilizationModeRoll = ANGLE,
 	.stabilizationModePitch  = ANGLE,
-	.stabilizationModeYaw = ANGLE,
+	.stabilizationModeYaw = RATE,
 	.yawMode = DEFUALT_YAW_MODE,
 	.getThrust = NULL,
 	.getRPY = NULL,
@@ -49,7 +49,7 @@ uint32_t commanderGetInactivityTime(void) {
 
 void commanderGetRPY(float* eulerRollDesired, float* eulerPitchDesired, float* eulerYawDesired) {
 	if (comm.getRPY) {
-		comm.getRPY(eulerRollDesired, eulerPitchDesired,eulerYawDesired);
+		comm.getRPY(eulerRollDesired, eulerPitchDesired, eulerYawDesired);
 	} else {
 		*eulerRollDesired = 0;
 		*eulerPitchDesired = 0;
@@ -94,7 +94,7 @@ void commanderLockThrust(void (*callback)(uint16_t* thrust), bool lock) {
 }
 
 void commanderSetThrust(void (*callback)(uint16_t* thrust)) {
-	if (comm.thrustLocked) {
+	if (!comm.thrustLocked) {
 		comm.getThrust = callback;
 	}
 }

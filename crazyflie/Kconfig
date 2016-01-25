@@ -6,7 +6,8 @@ menuconfig CRAZYFLIE
 	select MPU9250
 	select ACCEL
 	select GYRO
-	default y
+	depends on MOTOR
+	default n
 	config PIDVALUES_CRAZYFLIE
 		bool "PID Values of Crazyflie"
 		depends on CRAZYFLIE

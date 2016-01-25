@@ -67,6 +67,7 @@ static void lc_control(struct lc *lc, struct lc_msg *msg) {
 		copt->yaw < -1 || copt->yaw > 1 ||
 		copt->thrust < -1 || copt->thrust > 1
 	) {
+		printf("No correct Values in struct roll: %f pitch: %f yaw: %f thrust: %f\n", copt->roll, copt->pitch, copt->yaw, copt->thrust);
 		lc_sendFailt(lc);
 		return;
 	}
@@ -130,7 +131,7 @@ static void lc_select(struct lc *lc, struct lc_msg *msg) {
 			break;
 		case 3:
 			rcComm_selectThrust();
-			rcComm_selectRTY();
+			linuxComm_selectRTY();
 			break;
 #endif
 		default:

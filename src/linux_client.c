@@ -3,7 +3,6 @@
 #include <linux_client.h>
 #include <stdio.h>
 #include <vector.h>
-#include <motor_ctrl.h>
 #include <string.h>
 #include <irq.h>
 #include <buffer.h>
@@ -19,7 +18,9 @@ struct lc {
 #define BUFFER_TX ((struct buffer_base *) 0x3F07DE50)
 struct lc lc0;
 static void lc_shutdown(struct lc *lc) {
+#ifdef CONFIG_EMERGENCY
 	emergency_shutdown();
+#endif
 }
 void lcTask(void *data);
 void lc_ping(struct lc *lc, struct lc_msg *msg) {
@@ -41,10 +42,12 @@ int32_t lc_sendFailt(struct lc *lc) {
 	return 0;
 }
 void lc_emergency(struct lc *lc, struct lc_msg *msg) {
+#ifdef CONFIG_EMERGENCY
 	emergency_landing();
+#endif
 	lc_sendAct(lc);
 }
-struct lc *lc_init(struct motor *motor) {
+struct lc *lc_init() {
 	struct lc *lc = &lc0;
 	if (lc->init) {
 		return lc;
@@ -104,6 +107,7 @@ void lcTask(void *data) {
 			if (lc->callbacks[msg.type] != NULL) {
 				lc->callbacks[msg.type](lc, &msg);
 			} else {
+				printf("no callback for type: %d\n", msg.type);
 				lc_sendFailt(lc);
 			}
 		} else {

@@ -25,21 +25,17 @@
 
 #define RC_TIMER 3
 #define RC_PERIOD 24000
-#define RC_PIN1 5
-#define RC_PIN2 4
-#define RC_PIN3 3
-#define RC_PIN4 2
-#define RC_PIN5 7
-#define RC_PIN6 6
+#define RC_PIN1 CONFIG_RC_COMM_ROLL_ID //2
+#define RC_PIN2 CONFIG_RC_COMM_PITCH_ID //4
+#define RC_PIN3 CONFIG_RC_COMM_YAW_ID //5
+#define RC_PIN4 CONFIG_RC_COMM_THRUST_ID //6
+#define RC_PIN5 3
+#define RC_PIN6 7
 
 #define EM_LED 8
 
 #define MOTOR_TIMER 0
 #define MOTOR_PERIOD 20000
-#define MOTOR_PIN1 3
-#define MOTOR_PIN2 6
-#define MOTOR_PIN3 0
-#define MOTOR_PIN4 2
 
 /*
  * Create MPU, Gyro and Accel Device
@@ -134,10 +130,10 @@ void motor_testTask(void *data) {
 	int n = 1000;
 	bool up = true;
 	for (;;) {
-		motor_set(motor, MOTOR_PIN1, n);
-		motor_set(motor, MOTOR_PIN2, n);
-		motor_set(motor, MOTOR_PIN3, n);
-		motor_set(motor, MOTOR_PIN4, n);
+		motor_set(motor, CONFIG_MOTOR_ID_0, n);
+		motor_set(motor, CONFIG_MOTOR_ID_1, n);
+		motor_set(motor, CONFIG_MOTOR_ID_2, n);
+		motor_set(motor, CONFIG_MOTOR_ID_3, n);
 		if (up) {
 			n += 10;
 		} else {
@@ -167,10 +163,10 @@ void rcTestTask(void *data) {
 		pin[4] = rc_get(rc, 4);
 		pin[5] = rc_get(rc, 5);
 		printf("pin 0: %04ld 1: %04ld 2: %04ld 3: %04ld 4: %04ld 5: %04ld\n", pin[0], pin[1], pin[2], pin[3], pin[4], pin[5]);
-		motor_set(motor, MOTOR_PIN1, pin[5]);
-		motor_set(motor, MOTOR_PIN2, pin[5]);
-		motor_set(motor, MOTOR_PIN3, pin[5]);
-		motor_set(motor, MOTOR_PIN4, pin[5]);
+		motor_set(motor, CONFIG_MOTOR_ID_0, pin[5]);
+		motor_set(motor, CONFIG_MOTOR_ID_1, pin[5]);
+		motor_set(motor, CONFIG_MOTOR_ID_2, pin[5]);
+		motor_set(motor, CONFIG_MOTOR_ID_3, pin[5]);
 
 		
 		vTaskDelayUntil(&lastWakeUpTime, 10 / portTICK_PERIOD_MS);
@@ -184,7 +180,9 @@ int main() {
 	CONFIG_ASSERT(ret == 0);
 	struct timer *ftm;
 	struct pwm *pwm;
+#ifdef CONFIG_MOTOR
 	struct motor *motor;
+#endif
 	struct uart *uart = uart_init(1, 115200);
 #ifdef CONFIG_LC
 	struct lc *lc;
@@ -212,31 +210,33 @@ int main() {
 #if CONFIG_USE_STATS_FORMATTING_FUNCTIONS > 0
 	xTaskCreate(taskManTask, "Task Manager Task", 512, NULL, 1, NULL);
 #endif
+#ifdef CONFIG_MOTOR
 	{
 		struct timer *timer = timer_init(0, 32, 20000, 700);
 		CONFIG_ASSERT(timer != NULL);
 		motor = motor_init();
-		motor_enable(motor, MOTOR_PIN1);
-		motor_enable(motor, MOTOR_PIN2);
-		motor_enable(motor, MOTOR_PIN3);
-		motor_enable(motor, MOTOR_PIN4);
-#ifdef CONFIG_MOTORTEST
+		motor_enable(motor, CONFIG_MOTOR_ID_0);
+		motor_enable(motor, CONFIG_MOTOR_ID_1);
+		motor_enable(motor, CONFIG_MOTOR_ID_2);
+		motor_enable(motor, CONFIG_MOTOR_ID_3);
+# ifdef CONFIG_MOTORTEST
 		xTaskCreate(motor_testTask, "Motor Test Task", 512, motor, 1, NULL);
-#endif
-#ifdef CONFIG_MOTOR_OFF
+# endif
+# ifdef CONFIG_MOTOR_OFF
 		/* 
 		 * Correct Signal but is not smaler as minimum ESC do nothing. Init Sequenz of ESC is:
 		 * < 1070 then > 1070 for more speed
 		 */
-		motor_set(motor, MOTOR_PIN1, 1100); 
-		motor_set(motor, MOTOR_PIN2, 1100);
-		motor_set(motor, MOTOR_PIN3, 1100);
-		motor_set(motor, MOTOR_PIN4, 1100);
-#endif
+		motor_set(motor, CONFIG_MOTOR_ID_0, 1100); 
+		motor_set(motor, CONFIG_MOTOR_ID_1, 1100);
+		motor_set(motor, CONFIG_MOTOR_ID_2, 1100);
+		motor_set(motor, CONFIG_MOTOR_ID_3, 1100);
+# endif
 	}
+#endif
 #ifdef CONFIG_LC
 	{
-		lc = lc_init(motor);
+		lc = lc_init();
 		CONFIG_ASSERT(lc != NULL);
 	}
 #endif
@@ -307,7 +307,7 @@ int main() {
 		CONFIG_ASSERT(rcComm != NULL);
 	}
 #endif
-#ifdef CONFIG_DISPALY
+#ifdef CONFIG_DISPLAY
 	display_init();
 #endif
 	printf("Start Scheduler\n");

@@ -12,12 +12,6 @@
 #define PRINT_EMER(fmt, ...) printf("emergency: " fmt, ##__VA_ARGS__)
 #define PRINT_BAT(fmt, ...) printf("BAT: " fmt, ##__VA_ARGS__)
 
-/* TODO Move to CONFIG */
-#define MOTOR_PIN1 3
-#define MOTOR_PIN2 6
-#define MOTOR_PIN3 0
-#define MOTOR_PIN4 2
-
 struct emergency {
 	bool shutdown;
 	uint16_t thrust;
@@ -34,8 +28,8 @@ static void emergencyTask(void *data);
 static void batTask(void *data);
 struct emergency *emergency_init(struct motor *motor) {
 	emer.motor = motor;
-	xTaskCreate(emergencyTask, "Emergency Task", 512, &emer, CONFIG_MAX_PRIORITIES, &emer.emergency);
-	xTaskCreate(batTask, "Bat task", 512, &emer, CONFIG_MAX_PRIORITIES, &emer.emergency);
+	xTaskCreate(emergencyTask, "Emergency Task", 512, &emer, CONFIG_MAX_PRIORITIES - 1, &emer.emergency);
+	xTaskCreate(batTask, "Bat task", 512, &emer, CONFIG_MAX_PRIORITIES - 1, NULL);
 	return &emer;
 }
 int32_t emergency_deinit(struct emergency *emer) {
@@ -43,6 +37,7 @@ int32_t emergency_deinit(struct emergency *emer) {
 }
 
 void emergency_landing() {
+	PRINT_EMER("recv: emergency landing unblock Task\n");
 	vTaskResume(emer.emergency);
 }
 
@@ -55,10 +50,10 @@ void emergency_shutdown() {
 	PRINT_EMER("Disable all Interrupts and supsend all Task\n");
 	taskDISABLE_INTERRUPTS(); /* Disable all Interrupts */
 	vTaskSuspendAll(); /* Stop all Tasks */
-	motor_set(emer.motor, MOTOR_PIN1, 0);
-	motor_set(emer.motor, MOTOR_PIN2, 0);
-	motor_set(emer.motor, MOTOR_PIN3, 0);
-	motor_set(emer.motor, MOTOR_PIN4, 0);
+	motor_set(emer.motor, CONFIG_MOTOR_ID_0, 0);
+	motor_set(emer.motor, CONFIG_MOTOR_ID_1, 0);
+	motor_set(emer.motor, CONFIG_MOTOR_ID_2, 0);
+	motor_set(emer.motor, CONFIG_MOTOR_ID_3, 0);
 }
 
 void batThrustContoll(uint16_t* t) {

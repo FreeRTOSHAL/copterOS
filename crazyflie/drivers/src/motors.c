@@ -7,11 +7,6 @@
 #include "motors.h"
 #include <motor_ctrl.h>
 
-#define MOTOR_PIN1 3
-#define MOTOR_PIN2 6
-#define MOTOR_PIN3 0
-#define MOTOR_PIN4 2
-
 struct motorPerifDef_s {
 	struct motor *motor;
 	int32_t id[];
@@ -19,10 +14,10 @@ struct motorPerifDef_s {
 
 static struct motorPerifDef_s motor = {
 	.id = {
-		MOTOR_PIN1,
-		MOTOR_PIN2,
-		MOTOR_PIN3,
-		MOTOR_PIN4,
+		CONFIG_MOTOR_ID_0,
+		CONFIG_MOTOR_ID_1,
+		CONFIG_MOTOR_ID_2,
+		CONFIG_MOTOR_ID_3,
 	},
 };
 

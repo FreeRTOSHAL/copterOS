@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <commander.h>
 #include <remote_control.h>
 #include <rc_commander.h>
@@ -47,10 +48,11 @@ struct rcComm {
 
 struct rcComm rcComm = {
 	.thrustLocked = true,
-	.rollID = 3,
+	/* IDs Pos in Array of remote_contol struct*/
+	.rollID = 0,
 	.pitchID = 1,
-	.yawID = 0,
-	.thrustID = 5,
+	.yawID = 2,
+	.thrustID = 3,
 };
 
 struct rcComm *rcComm_init(struct rc *rc) {
@@ -144,8 +146,6 @@ static void rcComm_GetRPY(float* eulerRollDesired, float* eulerPitchDesired, flo
 	*eulerPitchDesired = 0;
 	*eulerYawDesired = 0;
 #endif
-
-	//printf("roll: %f pitch: %f yaw: %f\n", *eulerRollDesired, *eulerPitchDesired, *eulerYawDesired);
 }
 void rcComm_selectThrust() {
 	commanderSetThrust(&rcComm_GetThrust);

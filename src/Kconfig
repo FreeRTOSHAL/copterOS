@@ -1,20 +1,92 @@
 menu "Aplication Settings"
-config MOTORTEST
-	bool "Motor Test: Warinung Motor speed up to maximum"
-	default n
-config MOTOR_OFF
-	bool "Init PWM only"
-	default n
 config DISPLAY
 	bool "Activate Display"
 	default n
 	depends on CRAZYFLIE
+config MOTOR
+	bool "ESC Motor Control"
+	default y
+	help 
+		Motor Interface
+
+			-----------------
+			| Motor | Motor |
+			|   3   |   0   |
+			|  CW   |  CCW  |
+			|----------------
+			| Motor | Motor |
+			|   2   |   1   |
+			|  CCW  |  CW   |
+			-----------------
+	config MOTOR_ID_0
+		int "PWM ID for Motor 0"
+		default 3
+		depends on MOTOR
+		help
+			PWM ID for Motor 0
+	config MOTOR_ID_1
+		int "PWM ID for Motor 1"
+		default 6
+		depends on MOTOR
+		help
+			PWM ID for Motor 1
+	config MOTOR_ID_2
+		int "PWM ID for Motor 2"
+		default 0
+		depends on MOTOR
+		help
+			PWM ID for Motor 2
+	config MOTOR_ID_3
+		int "PWM ID for Motor 3"
+		default 2
+		depends on MOTOR
+		help
+			PWM ID for Motor 3
+	config MOTOR_OFF
+		depends on MOTOR
+		bool "Init PWM only No Motor Contoll"
+		default n
+	config MOTORTEST
+		bool "Motor Test: Warinung Motor speed up to maximum"
+		depends on MOTOR
+		default n
+	config EMERGENCY
+		bool "Activate Emergency Mangement"
+		default y
+		depends on MOTOR
+		help
+			Activate Emergency Mangement
+	
 config RC
 	bool "Activate Remote Control by Spectrum Receiver"
 	depends on CAPTURE
 	default y
 	help
 		Activate Remote Control by Spectrum Receiver
+	config RC_COMM_ROLL_ID
+		int "Caputre Interface ID for Roll"
+		default 2
+		depends on RC
+		help
+			Capture Interface ID for Roll Input
+	config RC_COMM_PITCH_ID
+		int "Caputre Interface ID for Pitch"
+		default 4
+		depends on RC
+		help
+			Capture Interface ID for Pitch Input
+	config RC_COMM_YAW_ID
+		int "Caputre Interface ID for Yaw"
+		default 5
+		depends on RC
+		help
+			Capture Interface ID for Yaw Input
+	config RC_COMM_THRUST_ID
+		int "Caputre Interface ID for Thrust"
+		default 6
+		depends on RC
+		help
+			Capture Interface ID for Thrust Input
 	config RC_COMMANDER
 		bool "Activate Remote Contol Commander"
 		default y
@@ -23,6 +95,7 @@ config RC
 			Activate Remote Control Commander over Spectrum Receiver
 	config RC_MOTORTEST
 		depends on RC
+		depends on MOTOR
 		bool "Motor Test over RC"
 		default n
 config LC
