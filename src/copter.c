@@ -130,10 +130,10 @@ void motor_testTask(void *data) {
 	int n = 1000;
 	bool up = true;
 	for (;;) {
-		motor_set(motor, CONFIG_MOTOR_ID_0, n);
-		motor_set(motor, CONFIG_MOTOR_ID_1, n);
-		motor_set(motor, CONFIG_MOTOR_ID_2, n);
-		motor_set(motor, CONFIG_MOTOR_ID_3, n);
+		motor_set(motor, 0, n);
+		motor_set(motor, 1, n);
+		motor_set(motor, 2, n);
+		motor_set(motor, 3, n);
 		if (up) {
 			n += 10;
 		} else {
@@ -163,10 +163,10 @@ void rcTestTask(void *data) {
 		pin[4] = rc_get(rc, 4);
 		pin[5] = rc_get(rc, 5);
 		printf("pin 0: %04ld 1: %04ld 2: %04ld 3: %04ld 4: %04ld 5: %04ld\n", pin[0], pin[1], pin[2], pin[3], pin[4], pin[5]);
-		motor_set(motor, CONFIG_MOTOR_ID_0, pin[5]);
-		motor_set(motor, CONFIG_MOTOR_ID_1, pin[5]);
-		motor_set(motor, CONFIG_MOTOR_ID_2, pin[5]);
-		motor_set(motor, CONFIG_MOTOR_ID_3, pin[5]);
+		motor_set(motor, 0, pin[5]);
+		motor_set(motor, 1, pin[5]);
+		motor_set(motor, 2, pin[5]);
+		motor_set(motor, 3, pin[5]);
 
 		
 		vTaskDelayUntil(&lastWakeUpTime, 10 / portTICK_PERIOD_MS);
@@ -227,10 +227,10 @@ int main() {
 		 * Correct Signal but is not smaler as minimum ESC do nothing. Init Sequenz of ESC is:
 		 * < 1070 then > 1070 for more speed
 		 */
-		motor_set(motor, CONFIG_MOTOR_ID_0, 1100); 
-		motor_set(motor, CONFIG_MOTOR_ID_1, 1100);
-		motor_set(motor, CONFIG_MOTOR_ID_2, 1100);
-		motor_set(motor, CONFIG_MOTOR_ID_3, 1100);
+		motor_set(motor, 0, 1100); 
+		motor_set(motor, 1, 1100);
+		motor_set(motor, 2, 1100);
+		motor_set(motor, 3, 1100);
 # endif
 	}
 #endif

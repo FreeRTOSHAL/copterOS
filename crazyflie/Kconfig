@@ -11,6 +11,16 @@ menuconfig CRAZYFLIE
 	config PIDVALUES_CRAZYFLIE
 		bool "PID Values of Crazyflie"
 		depends on CRAZYFLIE
+		default n
 	config PIDVALUES_TCM
 		bool "PID Values of TCM"
 		depends on CRAZYFLIE
+		default y
+	config MOTOR_ESC_MIN
+		int "Motor ESC Min Time"
+		depends on CRAZYFLIE
+		default 1050
+	config MOTOR_ESC_MAX
+		int "Motor ESC Min Time"
+		depends on CRAZYFLIE
+		default 1860

@@ -50,10 +50,10 @@ void emergency_shutdown() {
 	PRINT_EMER("Disable all Interrupts and supsend all Task\n");
 	taskDISABLE_INTERRUPTS(); /* Disable all Interrupts */
 	vTaskSuspendAll(); /* Stop all Tasks */
-	motor_set(emer.motor, CONFIG_MOTOR_ID_0, 0);
-	motor_set(emer.motor, CONFIG_MOTOR_ID_1, 0);
-	motor_set(emer.motor, CONFIG_MOTOR_ID_2, 0);
-	motor_set(emer.motor, CONFIG_MOTOR_ID_3, 0);
+	motor_set(emer.motor, 0, 0);
+	motor_set(emer.motor, 1, 0);
+	motor_set(emer.motor, 2, 0);
+	motor_set(emer.motor, 3, 0);
 }
 
 void batThrustContoll(uint16_t* t) {
