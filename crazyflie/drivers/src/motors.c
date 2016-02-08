@@ -36,6 +36,7 @@ void motorsDeInit(const MotorPerifDef** motorMapSelect) {
 	}
 }
 bool motorsTest(void) {
+#ifdef CONFIG_MOTOR_TEST
 	int ret;
 	int i;
 	for (i = 0; i < NBR_OF_MOTORS; i++) {
@@ -48,6 +49,7 @@ bool motorsTest(void) {
 		ret = motor_set(motor.motor, motor.id[i], 1000);
 		CONFIG_ASSERT(ret >= 0);
 	}
+#endif
 	return true;
 }
 void motorsSetRatio(uint32_t id, uint16_t ratio) {

@@ -56,6 +56,12 @@ config MOTOR
 		depends on MOTOR
 		help
 			Activate Emergency Mangement
+		config EMERGENCY_THRUST
+			int "Min Thrust at Emergency shutdown[Percent]"
+			default 45
+			depends on EMERGENCY
+			help
+				Min Thrust at Emergency shutdown in Percent
 	
 config RC
 	bool "Activate Remote Control by Spectrum Receiver"

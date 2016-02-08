@@ -10,7 +10,7 @@
 #include <commander.h>
 
 #define PRINT_EMER(fmt, ...) printf("emergency: " fmt, ##__VA_ARGS__)
-#define PRINT_BAT(fmt, ...) printf("BAT: " fmt, ##__VA_ARGS__)
+#define PRINT_BAT(fmt, alarm, ...) do {if (alarm) printf("BAT: ALARM: " fmt, ##__VA_ARGS__); else printf("BAT: " fmt, ##__VA_ARGS__); } while(0)
 
 struct emergency {
 	bool shutdown;
@@ -73,11 +73,11 @@ static void emergencyTask(void *data) {
 			 */
 			commanderGetThrust(&emer.thrust);
 			if (emer.thrust > 0) {
-				emer.thrust = (uint16_t) (((float) UINT16_MAX) * 0.4);
+				emer.thrust = (uint16_t) (((float) UINT16_MAX) * (CONFIG_EMERGENCY_THRUST/100.));
 			}
 			PRINT_EMER("Overwirde Thurst Contol\n");
 			commanderLockThrust(batThrustContoll, true);
-			vTaskDelay(2000 / portTICK_PERIOD_MS);
+			vTaskDelay(3000 / portTICK_PERIOD_MS);
 			PRINT_EMER("shutdown and save Copter\n");
 			emer.thrust = 0;
 		}
@@ -105,6 +105,7 @@ static void batTask(void *data) {
 	};
 	struct spi_slave *slave;
 	float val;
+	bool batalarm = false;
 	TickType_t lastWakeUpTime = xTaskGetTickCount();
 	adc = adc_init(1, 12, 4125000);
 	spi = spi_init(0, SPI_3WIRE_CS, NULL);
@@ -118,12 +119,13 @@ static void batTask(void *data) {
 	vTaskDelay(10 / portTICK_PERIOD_MS);
 	for(;;) {
 		val = tps_diag(tps, TPS_VBAT, adc, 100 / portTICK_PERIOD_MS);
-		PRINT_BAT("TPS_VBAT : %f V\n", val);
+		PRINT_BAT("TPS_VBAT : %f V\n", batalarm, val);
 		if (val <= 10) { /* TODO move to CONFIG */
 			PRINT_EMER("Voltag to low!!\n");
+			batalarm = true;
 			emergency_landing();
 		}
-		if (val <= 9.5) { /* TODO move to CONFIG */
+		if (val <= 9.7) { /* TODO move to CONFIG */
 			PRINT_EMER("Baterie drop detected!\n");
 			emergency_shutdown();
 		}

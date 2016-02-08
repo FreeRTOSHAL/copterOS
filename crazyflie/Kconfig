@@ -24,3 +24,9 @@ menuconfig CRAZYFLIE
 		int "Motor ESC Min Time"
 		depends on CRAZYFLIE
 		default 1860
+	config MOTOR_TEST
+		bool "Activate Motor Test"
+		depends on CRAZYFLIE
+		default n
+		help
+			Activate Motor Test every System start
