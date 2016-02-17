@@ -38,7 +38,7 @@ int32_t motor_set(struct motor *motor, uint32_t id, uint32_t value) {
 }
 int32_t motor_enable(struct motor *motor, uint32_t id) {
 	int32_t ret;
-	int index = 0;
+	uint32_t index = 0;
 	for (index = 0; index < MOTOR_MAX_CHANNELS; index++) {
 		if(motor->unit[index].pwm == NULL) {
 			break;

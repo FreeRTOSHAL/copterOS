@@ -36,7 +36,7 @@ struct linuxComm {
 };
 
 struct linuxComm comm = {
-	.ctl = {0,0,0-1},
+	.ctl = {0,0,0,-1},
 };
 
 

@@ -32,7 +32,7 @@ struct emergency *emergency_init(struct motor *motor) {
 	xTaskCreate(batTask, "Bat task", 512, &emer, CONFIG_MAX_PRIORITIES - 1, NULL);
 	return &emer;
 }
-int32_t emergency_deinit(struct emergency *emer) {
+int32_t emergency_deinit(struct emergency *em) {
 	return 0;
 }
 
