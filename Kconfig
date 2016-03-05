@@ -3,6 +3,6 @@
 # see Documentation/kbuild/kconfig-language.txt.
 #
 mainmenu "FreeRTOS Configuration"
-source scripts/Kconfig
+source scripts/Kconfig.projekt
 source src/Kconfig
 source crazyflie/Kconfig
