@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <FreeRTOS.h>
+#include <semphr.h>
 #include <commander.h>
 #include <rc_commander.h>
 #include <linux_client.h>
@@ -33,6 +35,7 @@ struct linuxComm {
 	bool init;
 	struct lc *lc;
 	struct autocopt_control ctl;
+	SemaphoreHandle_t mutex;
 };
 
 struct linuxComm comm = {
@@ -46,8 +49,12 @@ struct linuxComm *linuxComm_init(struct lc *lc) {
 	if (comm.init) {
 		return &comm;
 	}
-	comm.init = true;
 	comm.lc = lc;
+	comm.mutex = xSemaphoreCreateMutex();
+	if (comm.mutex == NULL) {
+		return NULL;
+	}
+	comm.init = true;
 	lc_registerCallback(lc, LC_TYPE_SELECT, lc_select);
 	lc_registerCallback(lc, LC_TYPE_CONTROL, lc_control);
 #ifdef CONFIG_DEFAULT_RC_LINUX
@@ -71,12 +78,17 @@ static void lc_control(struct lc *lc, struct lc_msg *msg) {
 		lc_sendFailt(lc);
 		return;
 	}
+	xSemaphoreTake(comm.mutex, portMAX_DELAY);
 	memcpy(&comm.ctl, msg->data, sizeof(struct autocopt_control));
+	xSemaphoreGive(comm.mutex);
 	lc_sendAct(lc);
 }
 static void linuxComm_GetThrust(uint16_t* thrust) {
 	float t;
+	xSemaphoreTake(comm.mutex, portMAX_DELAY);
 	t = comm.ctl.thrust;
+	xSemaphoreGive(comm.mutex);
+
 	t += 1;
 	t /= 2;
 
@@ -88,9 +100,11 @@ static void linuxComm_GetRPY(float* eulerRollDesired, float* eulerPitchDesired, 
 	float roll;
 	float pitch;
 	float yaw;
+	xSemaphoreTake(comm.mutex, portMAX_DELAY);
 	roll = comm.ctl.roll;
 	pitch = -comm.ctl.pitch;
 	yaw = comm.ctl.yaw;
+	xSemaphoreGive(comm.mutex);
 
 	*eulerRollDesired = (roll * EULER_ROLL_MAX);
 	*eulerPitchDesired = (pitch * EULER_PITCH_MAX);
