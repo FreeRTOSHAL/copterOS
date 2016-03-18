@@ -114,6 +114,12 @@ config LC
 		depends on CRAZYFLIE && LC
 		help
 			Activate Linux Commander over Buffer Driver
+		config LC_COMMANDER_DETECT_BIG_DIFF
+			bool "Detect Big Diff"
+			default n
+			depends on LC_COMMANDER
+			help 
+				Print Error on big diff
 
 comment "Warning no Receiver select"
 	depends on CRAZYFLIE && (!LC_COMMANDER && !RC_COMMANDER)

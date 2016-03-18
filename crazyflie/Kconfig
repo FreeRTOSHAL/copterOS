@@ -8,14 +8,17 @@ menuconfig CRAZYFLIE
 	select GYRO
 	depends on MOTOR
 	default n
-	config PIDVALUES_CRAZYFLIE
-		bool "PID Values of Crazyflie"
+	
+	choice
+		prompt "Select PID Config"
 		depends on CRAZYFLIE
-		default n
-	config PIDVALUES_TCM
-		bool "PID Values of TCM"
-		depends on CRAZYFLIE
-		default y
+		config PIDVALUES_TCM
+			bool "PID Values of TCM"
+			depends on CRAZYFLIE
+		config PIDVALUES_CRAZYFLIE
+			bool "PID Values of Crazyflie"
+			depends on CRAZYFLIE
+	endchoice
 	config MOTOR_ESC_MIN
 		int "Motor ESC Min Time"
 		depends on CRAZYFLIE

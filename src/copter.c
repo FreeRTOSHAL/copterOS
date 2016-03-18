@@ -103,7 +103,7 @@ void ledTask(void *data) {
 	}
 }
 
-#if CONFIG_USE_STATS_FORMATTING_FUNCTIONS > 0
+#ifdef CONFIG_USE_STATS_FORMATTING_FUNCTIONS
 void taskManTask(void *data) {
 	TickType_t lastWakeUpTime = xTaskGetTickCount();
 	static char taskBuff[5 * 1024];
@@ -112,7 +112,7 @@ void taskManTask(void *data) {
 		printf("name\t\tState\tPrio\tStack\tTaskNr.\n");
 		printf("%s", taskBuff);
 		printf("blocked ('B'), ready ('R'), deleted ('D') or suspended ('S')\n");
-#if CONFIG_GENERATE_RUN_TIME_STATS > 0
+#ifdef CONFIG_GENERATE_RUN_TIME_STATS
 		printf("name\t\tTime\t\t%%\n");
 		vTaskGetRunTimeStats(taskBuff);
 		printf("%s", taskBuff);
@@ -163,10 +163,12 @@ void rcTestTask(void *data) {
 		pin[4] = rc_get(rc, 4);
 		pin[5] = rc_get(rc, 5);
 		printf("pin 0: %04ld 1: %04ld 2: %04ld 3: %04ld 4: %04ld 5: %04ld\n", pin[0], pin[1], pin[2], pin[3], pin[4], pin[5]);
+		#if 0
 		motor_set(motor, 0, pin[5]);
 		motor_set(motor, 1, pin[5]);
 		motor_set(motor, 2, pin[5]);
 		motor_set(motor, 3, pin[5]);
+		#endif
 
 		
 		vTaskDelayUntil(&lastWakeUpTime, 10 / portTICK_PERIOD_MS);
@@ -207,7 +209,7 @@ int main() {
 	ret = pwm_setDutyCycle(pwm, 10000);
 	CONFIG_ASSERT(ret == 0);
 	xTaskCreate(ledTask, "LED Task", 128, pwm, 1, NULL);
-#if CONFIG_USE_STATS_FORMATTING_FUNCTIONS > 0
+#ifdef CONFIG_USE_STATS_FORMATTING_FUNCTIONS 
 	xTaskCreate(taskManTask, "Task Manager Task", 512, NULL, 1, NULL);
 #endif
 #ifdef CONFIG_MOTOR
