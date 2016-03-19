@@ -197,6 +197,9 @@ int main() {
 	CONFIG_ASSERT(ret == 0);
 #endif
 	printf("Init Devices\n");
+#ifdef CONFIG_INSTANCE_NAME
+	hal_printNames();
+#endif
 	ret = initGPIO();
 	CONFIG_ASSERT(ret == 0);
 
