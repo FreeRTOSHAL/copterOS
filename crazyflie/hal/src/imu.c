@@ -8,6 +8,7 @@
  * Crazyflie control firmware
  *
  * Copyright (C) 2011-2012 Bitcraze AB
+ * Copyright (C) 2016 Andreas Werner <kernel@andy89.org> FeeRTOS HAL Adaption 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
