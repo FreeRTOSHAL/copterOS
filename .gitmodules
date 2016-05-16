@@ -1,18 +1,18 @@
 [submodule "freertos"]
 	path = freertos
-	url = git@scuderia.cs.hs-rm.de:fhal/fhal-kernel.git
+	url = ../fhal-kernel.git
 [submodule "scripts"]
 	path = scripts
-	url = git@scuderia.cs.hs-rm.de:fhal/fhal-buildsystem.git
+	url = ../fhal-buildsystem.git
 [submodule "driver"]
 	path = driver
-	url = git@scuderia.cs.hs-rm.de:fhal/fhal-driver.git
+	url = ../fhal-driver.git
 [submodule "mach"]
 	path = mach
-	url = git@scuderia.cs.hs-rm.de:fhal/fhal-mach.git
+	url = ../fhal-mach.git
 [submodule "arch"]
 	path = arch
-	url = git@scuderia.cs.hs-rm.de:fhal/fhal-arch.git
+	url = ../fhal-arch.git
 [submodule "tools/autocopt-tools"]
 	path = tools/autocopt-tools
-	url = git@scuderia.cs.hs-rm.de:fhal/fhal-libcopt.git
+	url = ../fhal-libcopt.git

@@ -36,6 +36,7 @@ CONFIG_ARCH_HAS_TICKLESS_SUPPORT=y
 # Mach Settings
 #
 CONFIG_MACH_VF610=y
+# CONFIG_MACH_STM32 is not set
 
 #
 # VF610 Settings
